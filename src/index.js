@@ -26,6 +26,22 @@ app.put("/cadastro", (req, res) => {
   res.status(204).json(pessoas);
 });
 
+app.put('/cadastro/:id', (req, res) => {
+  const pessoa = req.body;
+  const id = Number(req.params.id);
+  const indexPessoa = pessoas.findIndex(pessoa=>pessoa.id === id);
+  pessoas[indexPessoa] = {
+    id: id,
+    email: email,
+    senha: senha,
+    recado: pessoa.recado = [{
+      id: Math.floor(Math.random() * 5050),
+      titulo: titulo,
+      descricao: descricao
+    }]
+  }
+})
+
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
