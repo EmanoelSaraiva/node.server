@@ -9,17 +9,16 @@ let pessoas = [];
 app.post("/cadastro", (req, res) => {
   const pessoa = req.body;
 
+  const validarEmail =  pessoas.find(p => p.email === pessoa.email);
+  if(validarEmail){
+    return res.status(400).json("Email já cadastrado");
+  }
+
   pessoas.push({
     id: Math.floor(Math.random() * 5050),
     email: pessoa.email,
     senha: pessoa.senha,
-    recado: (pessoa.recado = [
-      {
-        id: Math.floor(Math.random() * 5050),
-        titulo: pessoa.titulo,
-        descricao: pessoa.descricao,
-      },
-    ]),
+    recado: pessoa.recado = [],
   });
 
   console.log(pessoas);
@@ -32,6 +31,7 @@ app.put('/cadastro/:id', (req, res) => {
   const pessoa = req.body;
   const id = Number(req.params.id);
   const indexPessoa = pessoas.findIndex(pessoa=>pessoa.id === id);
+  
   pessoas[indexPessoa] = {
     ...pessoas[indexPessoa], // mantém os dados originais da pessoa
     recado: [{
@@ -41,7 +41,7 @@ app.put('/cadastro/:id', (req, res) => {
     }]
   };
   console.log(pessoas);
-  res.send('Pessoa atuliazada com sucesso')
+  res.send('Pessoa atulizada com sucesso')
 })
 
 app.get('/pessoas', (req, res)=>{
