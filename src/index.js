@@ -5,6 +5,7 @@ app.use(express.json());
 
 let pessoas = [];
 
+
 // Aqui estou fazendo a criação de um usuário, usando o método Math() para gerar ID aleatórios sem decimais
 app.post("/cadastro", (req, res) => {
   const pessoa = req.body;
@@ -13,6 +14,12 @@ app.post("/cadastro", (req, res) => {
   if(validarEmail){
     return res.status(400).json("Email já cadastrado");
   }
+
+  const vSenha = /^(?=.*[a-zA-Z])[0-9a-zA-Z]{1,8}$/;
+  if (!vSenha.test(req.body.senha)) {
+    return res.status(401).json("Senha inválida");
+  }
+
 
   pessoas.push({
     id: Math.floor(Math.random() * 5050),
