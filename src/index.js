@@ -5,6 +5,23 @@ app.use(express.json());
 
 let pessoas = [];
 
+const requestLogin = (req, res, next) => {
+  const { email, senha } = req.body;
+
+  const validarEmail =  pessoas.find(p => p.email === email);
+  if(!validarEmail){
+      return res.status(406).json("Email não cadastrado");
+  }
+  const validarSenha =  pessoas.find(p => p.senha === senha);
+  if(!validarSenha){
+      return res.status(406).json("Senha não cadastrada");
+  }
+  next();
+}
+
+app.get('/login', requestLogin, (req, res) => {
+  res.status(201).json("Logado com sucesso");
+})
 
 // Aqui estou fazendo a criação de um usuário, usando o método Math() para gerar ID aleatórios sem decimais
 app.post("/cadastro", (req, res) => {
@@ -12,12 +29,12 @@ app.post("/cadastro", (req, res) => {
 
   const validarEmail =  pessoas.find(p => p.email === pessoa.email);
   if(validarEmail){
-    return res.status(400).json("Email já cadastrado");
+    return res.status(406).json("Email já cadastrado");
   }
 
   const vSenha = /^(?=.*[a-zA-Z])[0-9a-zA-Z]{1,8}$/;
   if (!vSenha.test(req.body.senha)) {
-    return res.status(401).json("Senha inválida");
+    return res.status(406).json("Senha inválida");
   }
 
 
@@ -33,22 +50,25 @@ app.post("/cadastro", (req, res) => {
 });
 
 
-// Aqui usei put para poder registrar recados após login
-app.put('/cadastro/:id', (req, res) => {
+// Aqui usei post para poder registrar recados após login
+app.post('/cadastro/:id', (req, res) => {
   const pessoa = req.body;
   const id = Number(req.params.id);
   const indexPessoa = pessoas.findIndex(pessoa=>pessoa.id === id);
+
+  // Valida se existe pessoa cadastrada
+  if(indexPessoa === -1){
+    return res.status(406).json("ID não cadastrado");
+  }
+
+  pessoas[indexPessoa].recado.push( {
+    id: Math.floor(Math.random() * 5050),
+    titulo: pessoa.titulo,
+    descricao: pessoa.descricao
+  })
   
-  pessoas[indexPessoa] = {
-    ...pessoas[indexPessoa], // mantém os dados originais da pessoa
-    recado: [{
-      id: Math.floor(Math.random() * 5050),
-      titulo: pessoa.titulo,
-      descricao: pessoa.descricao
-    }]
-  };
   console.log(pessoas);
-  res.send('Pessoa atulizada com sucesso')
+  res.send('Recado inserido com sucesso')
 })
 
 app.get('/pessoas', (req, res)=>{
