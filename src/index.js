@@ -7,22 +7,33 @@ app.use(express.json());
 
 let pessoas = [];
 
+const validaIdPessoa = (req, res, next) => {
+  const id  = req.params.id;
+  const pessoa = pessoas.findIndex((p) => p.id === Number(id));
+  console.log(pessoa)
+  if (pessoa === -1) {
+      return res.status(404).json("Pessoa não encontrada");
+  } else{
+    next();
+  }
+
+}
+
+//Inicio do CRUD
 
 app.post("/login", (req, res) => {
   const login = req.body
   const id = login.id;
   const senha = login.senha;
 
-  const index = pessoas.find(p=> p.id === id);
+  const idPessoa = pessoas.find(p=> p.id === id);
 
-  if(!index) {
+  if(!idPessoa) {
       return res.status(402).json("Por favor, digite um id valido");
   }
 
-  bcrypt.compare(senha, index.senha, function(err, result) {
-    console.log(result)
-    console.log(senha) 
-    console.log(index.senha)
+  bcrypt.compare(senha, idPessoa.senha, function(err, result) {
+    
       if(result){
           return res.status(200).json("Usuario valido");
       } else {
@@ -60,12 +71,11 @@ app.post("/cadastro", (req, res) => {
     }
   });
 
-  console.log(pessoas);
   res.status(204).json(pessoas);
 });
 
 // Aqui usei post para poder registrar recados após login
-app.post("/cadastro/:id", (req, res) => {
+app.post("/cadastro/:id", validaIdPessoa,(req, res) => {
   const pessoa = req.body;
   const id = Number(req.params.id);
   const indexPessoa = pessoas.findIndex((pessoa) => pessoa.id === id);
@@ -88,13 +98,24 @@ app.post("/cadastro/:id", (req, res) => {
 app.get("/pessoas", (req, res) => {
   const pessoasComRecados = pessoas.map((pessoa) => {
     return {
-      ...pessoa,
-      recado: pessoa.recado,
+      ...pessoa   
     };
   });
   res.send(pessoasComRecados);
 });
 
+app.get("/pessoas/:id", validaIdPessoa, (req, res) => {
+  const recadoDaPessoa = pessoas.map((pessoa) => {
+    return {
+      recado: pessoa.recado.map((recado) => {
+        return {
+        ...recado,
+        };
+      }),
+    };
+  })
+  res.send(recadoDaPessoa); 
+});
 app.listen(8081, () => {
   console.log("Servidor Aberto");
 });
