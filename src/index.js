@@ -10,7 +10,7 @@ let pessoas = [];
 const validaIdPessoa = (req, res, next) => {
   const id  = req.params.id;
   const pessoa = pessoas.findIndex((p) => p.id === Number(id));
-  console.log(pessoa)
+ 
   if (pessoa === -1) {
       return res.status(404).json("Pessoa não encontrada");
   } else{
@@ -86,15 +86,15 @@ app.post("/cadastro/:id", validaIdPessoa,(req, res) => {
   }
 
   pessoas[indexPessoa].recado.push({
-    id: Math.floor(Math.random() * 5050),
+    idRecado: Math.floor(Math.random() * 5050),
     titulo: pessoa.titulo,
     descricao: pessoa.descricao,
   });
 
-  console.log(pessoas);
-  res.send("Recado inserido com sucesso");
+  res.status(201).json("Novo recado adicionado")
 });
 
+//listar pessoas
 app.get("/pessoas", (req, res) => {
   const pessoasComRecados = pessoas.map((pessoa) => {
     return {
@@ -104,6 +104,7 @@ app.get("/pessoas", (req, res) => {
   res.send(pessoasComRecados);
 });
 
+//listar recados
 app.get("/pessoas/:id", validaIdPessoa, (req, res) => {
   const recadoDaPessoa = pessoas.map((pessoa) => {
     return {
@@ -116,6 +117,29 @@ app.get("/pessoas/:id", validaIdPessoa, (req, res) => {
   })
   res.send(recadoDaPessoa); 
 });
+
+//Deletar recados
+app.delete('/pessoas/:idPessoa/recados/:idRecado', (req, res) => {
+  const idPessoa = Number(req.params.idPessoa);
+  const idRecado = Number(req.params.idRecado);
+  const indexPessoa = pessoas.findIndex(p => p.id === idPessoa);
+  
+  // Valida se existe pessoa cadastrada
+  if (indexPessoa === -1) {
+    return res.status(404).json('Pessoa não encontrada');
+  }
+
+  const indexRecado = pessoas[indexPessoa].recado.findIndex(r => r.idRecado === idRecado);
+
+  //Valida se existe recado cadastrado
+  if (indexRecado === -1) {
+    return res.status(404).json('Recado não encontrado');
+  }
+
+  pessoas[indexPessoa].recado.splice(indexRecado, 1);
+  res.status(204).send();
+});
+
 app.listen(8081, () => {
   console.log("Servidor Aberto");
 });
