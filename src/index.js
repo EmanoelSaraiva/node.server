@@ -19,7 +19,7 @@ const validaIdPessoa = (req, res, next) => {
 
 }
 
-//Inicio do CRUD
+
 
 app.post("/login", (req, res) => {
   const login = req.body
@@ -29,7 +29,7 @@ app.post("/login", (req, res) => {
   const idPessoa = pessoas.find(p=> p.email === email);
 
   if(!idPessoa) {
-      return res.status(401).json("Por favor, digite um id valido");
+      return res.status(401).json("E-mail e Senha inválidos");
   }
 
   bcrypt.compare(senha, idPessoa.senha, function(err, result) {
@@ -37,10 +37,12 @@ app.post("/login", (req, res) => {
       if(result){
           return res.status(202).json("Usuario logado");
       } else {
-          return res.status(406).json("Usuario invalido");
+          return res.status(406).json("E-mail e Senha inválidos");
       }
   });
 });
+
+//Inicio do CRUD
 
 // Aqui estou fazendo a criação de um usuário, usando o método Math() para gerar ID aleatórios sem decimais
 app.post("/cadastro", (req, res) => {
@@ -71,7 +73,7 @@ app.post("/cadastro", (req, res) => {
     }
   });
 
-  res.status(201).json("Cadastrado com sucesso");
+  return res.status(201).json("Cadastrado com sucesso");
 });
 
 // Aqui registra recados após login
@@ -80,32 +82,40 @@ app.post("/cadastro/:id", validaIdPessoa,(req, res) => {
   const id = Number(req.params.id);
   const indexPessoa = pessoas.findIndex((pessoa) => pessoa.id === id);
 
-  // Valida se existe pessoa cadastrada
-  if (indexPessoa === -1) {
-    return res.status(417).json("ID não cadastrado");
-  }
-
   pessoas[indexPessoa].recado.push({
     idRecado: Math.floor(Math.random() * 5050),
     titulo: pessoa.titulo,
     descricao: pessoa.descricao,
   });
 
-  res.status(201).json("Novo recado adicionado")
+  return res.status(201).json("Novo recado adicionado")
 });
 
 //listar pessoas
 app.get("/pessoas", (req, res) => {
+  
+  if (pessoas.length < 1){
+    return res.status(400).json("Sem registro de pessoas")
+  }
+
   const pessoasComRecados = pessoas.map((pessoa) => {
+    
     return {
       ...pessoa   
     };
   });
-  res.send(pessoasComRecados);
+  return res.send(pessoasComRecados);
 });
 
 //listar recados
 app.get("/pessoas/:id", validaIdPessoa, (req, res) => {
+  const id = Number(req.params.id);
+  const indexPessoa = pessoas.findIndex((pessoa) => pessoa.id === id);
+
+  if(pessoas[indexPessoa].recado.length < 1){
+    return res.status(400).json("Sem registro de recados")
+  }
+
   const recadoDaPessoa = pessoas.map((pessoa) => {
     return {
       recado: pessoa.recado.map((recado) => {
@@ -115,7 +125,7 @@ app.get("/pessoas/:id", validaIdPessoa, (req, res) => {
       }),
     };
   })
-  res.send(recadoDaPessoa); 
+  return res.send(recadoDaPessoa); 
 });
 
 //Atualiza recado
@@ -123,11 +133,6 @@ app.put('/pessoas/:id/recados/:idRecado', validaIdPessoa, (req, res) => {
   const id = Number(req.params.id);
   const idRecado = Number(req.params.idRecado);
   const indexPessoa = pessoas.findIndex(p => p.id === id);
-  
-  // Valida se existe pessoa cadastrada
-  if (indexPessoa === -1) {
-    return res.status(404).json('Pessoa não encontrada');
-  }
   
   const indexRecado = pessoas[indexPessoa].recado.findIndex(r => r.idRecado === idRecado);
   
@@ -148,15 +153,10 @@ app.put('/pessoas/:id/recados/:idRecado', validaIdPessoa, (req, res) => {
 })
 
 //Deletar recados
-app.delete('/pessoas/:idPessoa/recados/:idRecado', (req, res) => {
-  const idPessoa = Number(req.params.idPessoa);
+app.delete('/pessoas/:id/recados/:idRecado', validaIdPessoa, (req, res) => {
+  const id = Number(req.params.idPessoa);
   const idRecado = Number(req.params.idRecado);
-  const indexPessoa = pessoas.findIndex(p => p.id === idPessoa);
-  
-  // Valida se existe pessoa cadastrada
-  if (indexPessoa === -1) {
-    return res.status(404).json('Pessoa não encontrada');
-  }
+  const indexPessoa = pessoas.findIndex(p => p.id === id);
 
   const indexRecado = pessoas[indexPessoa].recado.findIndex(r => r.idRecado === idRecado);
 
