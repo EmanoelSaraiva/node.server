@@ -12,7 +12,7 @@ const validaIdPessoa = (req, res, next) => {
   const pessoa = pessoas.findIndex((p) => p.id === Number(id));
  
   if (pessoa === -1) {
-      return res.status(404).json("Pessoa não encontrada");
+      return res.status(400).json("Pessoa não encontrada");
   } else{
     next();
   }
@@ -23,19 +23,19 @@ const validaIdPessoa = (req, res, next) => {
 
 app.post("/login", (req, res) => {
   const login = req.body
-  const id = login.id;
+  const email = login.email;
   const senha = login.senha;
 
-  const idPessoa = pessoas.find(p=> p.id === id);
+  const idPessoa = pessoas.find(p=> p.email === email);
 
   if(!idPessoa) {
-      return res.status(402).json("Por favor, digite um id valido");
+      return res.status(401).json("Por favor, digite um id valido");
   }
 
   bcrypt.compare(senha, idPessoa.senha, function(err, result) {
     
       if(result){
-          return res.status(200).json("Usuario valido");
+          return res.status(202).json("Usuario logado");
       } else {
           return res.status(406).json("Usuario invalido");
       }
@@ -50,7 +50,7 @@ app.post("/cadastro", (req, res) => {
 
   const validarEmail = pessoas.find((p) => p.email === pessoa.email);
   if (validarEmail) {
-    return res.status(406).json("Email já cadastrado");
+    return res.status(409).json("Email já cadastrado");
   }
 
   const vSenha = /^(?=.*[a-zA-Z])[0-9a-zA-Z]{1,8}$/;
@@ -67,11 +67,11 @@ app.post("/cadastro", (req, res) => {
         recado: (pessoa.recado = []),
       });
     } else {
-      return err.status(401).json("Senha inválida" + err);
+      return err.status(406).json("Senha inválida" + err);
     }
   });
 
-  res.status(204).json(pessoas);
+  res.status(201).json("Cadastrado com sucesso");
 });
 
 // Aqui registra recados após login
@@ -82,7 +82,7 @@ app.post("/cadastro/:id", validaIdPessoa,(req, res) => {
 
   // Valida se existe pessoa cadastrada
   if (indexPessoa === -1) {
-    return res.status(406).json("ID não cadastrado");
+    return res.status(417).json("ID não cadastrado");
   }
 
   pessoas[indexPessoa].recado.push({
@@ -144,8 +144,7 @@ app.put('/pessoas/:id/recados/:idRecado', validaIdPessoa, (req, res) => {
     descricao: recado.descricao,
   }
 
-  console.log(recado)
-  res.status(204).json('Recado atualizado');
+  return res.status(204).json("Recado atualizado");
 })
 
 //Deletar recados
@@ -167,7 +166,7 @@ app.delete('/pessoas/:idPessoa/recados/:idRecado', (req, res) => {
   }
 
   pessoas[indexPessoa].recado.splice(indexRecado, 1);
-  res.status(204).send();
+  return res.status(205).send('Recado deletado');
 });
 
 app.listen(8081, () => {
