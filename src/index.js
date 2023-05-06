@@ -74,7 +74,7 @@ app.post("/cadastro", (req, res) => {
   res.status(204).json(pessoas);
 });
 
-// Aqui usei post para poder registrar recados após login
+// Aqui registra recados após login
 app.post("/cadastro/:id", validaIdPessoa,(req, res) => {
   const pessoa = req.body;
   const id = Number(req.params.id);
@@ -117,6 +117,36 @@ app.get("/pessoas/:id", validaIdPessoa, (req, res) => {
   })
   res.send(recadoDaPessoa); 
 });
+
+//Atualiza recado
+app.put('/pessoas/:id/recados/:idRecado', validaIdPessoa, (req, res) => {
+  const id = Number(req.params.id);
+  const idRecado = Number(req.params.idRecado);
+  const indexPessoa = pessoas.findIndex(p => p.id === id);
+  
+  // Valida se existe pessoa cadastrada
+  if (indexPessoa === -1) {
+    return res.status(404).json('Pessoa não encontrada');
+  }
+  
+  const indexRecado = pessoas[indexPessoa].recado.findIndex(r => r.idRecado === idRecado);
+  
+  //Valida se existe recado cadastrado
+  if (indexRecado === -1) {
+    return res.status(404).json('Recado não encontrado');
+  }
+
+  const recado = req.body;
+
+  pessoas[indexPessoa].recado[indexRecado] = {
+    idRecado: recado.idRecado = idRecado,
+    titulo: recado.titulo,
+    descricao: recado.descricao,
+  }
+
+  console.log(recado)
+  res.status(204).json('Recado atualizado');
+})
 
 //Deletar recados
 app.delete('/pessoas/:idPessoa/recados/:idRecado', (req, res) => {
