@@ -7,11 +7,11 @@ app.use(express.json());
 
 let pessoas = [];
 
-//Middleware`s para validar usuário antes das açoes de login e após login
+//Middleware`s para validar usuário
 
 const validaIdPessoa = (req, res, next) => {
-  const id = req.params.id;
-  const pessoa = pessoas.findIndex((p) => p.id === Number(id));
+  const id = Number(req.params.id);
+  const pessoa = pessoas.findIndex((p) => p.id === id);
 
   if (pessoa === -1) {
     return res.status(400).json("Pessoa não encontrada");
@@ -20,20 +20,26 @@ const validaIdPessoa = (req, res, next) => {
   }
 };
 
-const validaLogin = (req, res, next) => {
-  const id = req.params.id;
-  const pessoa = pessoas.findIndex((p) => p.id === Number(id));
-  
-  if (pessoas[pessoa].logado === true) {
-    next();
-  } else{
-    return res.status(401).json("Usuário não logado");
+const validaIdRecado = (req, res, next) => {
+  const idRecado = Number(req.params.idRecado);
+  const idPessoa = Number(req.params.id);
+
+  const indexPessoa = pessoas.findIndex((p) => p.id === idPessoa);
+
+  const indexRecado = pessoas[indexPessoa].recado.findIndex((r) => r.idRecado === idRecado);
+
+  if (indexRecado === -1) {
+    return res.status(400).json("Recado não encontrado");
   }
+
+  res.status(207).json("Recado alterado")
+  next()
+  
 };
 
 //Inicio do CRUD
 
-// Aqui estou fazendo a criação de um usuário, usando o método Math() para gerar ID aleatórios sem decimais
+// Criação de um usuário
 app.post("/cadastro", (req, res) => {
   const pessoa = req.body;
 
@@ -52,12 +58,11 @@ app.post("/cadastro", (req, res) => {
   bcrypt.hash(pessoa.senha, saltRounds, function (err, hash) {
     if (hash) {
       pessoas.push({
-        id: Math.floor(Math.random() * 5050),
+        id: pessoas.length + 1,
         email: pessoa.email,
         nome: pessoa.nome,
         senha: hash,
         recado: (pessoa.recado = []),
-        logado: false,
       });
     } else {
       return err.status(406).json("Senha inválida" + err);
@@ -95,7 +100,6 @@ app.post("/login", (req, res) => {
 
   bcrypt.compare(senha, idPessoa.senha, function (err, result) {
     if (result) {
-      idPessoa.logado = true;
       return res.status(202).json("Usuario logado");
     } else {
       return res.status(406).json("E-mail e Senha inválidos");
@@ -104,13 +108,13 @@ app.post("/login", (req, res) => {
 });
 
 // Aqui registra recados após login
-app.post("/cadastro/:id", validaIdPessoa, validaLogin, (req, res) => {
+app.post("/cadastro/:id", validaIdPessoa, (req, res) => {
   const pessoa = req.body;
   const id = Number(req.params.id);
   const indexPessoa = pessoas.findIndex((pessoa) => pessoa.id === id);
 
   pessoas[indexPessoa].recado.push({
-    idRecado: Math.floor(Math.random() * 5050),
+    idRecado: pessoas[indexPessoa].recado.length + 1,
     titulo: pessoa.titulo,
     descricao: pessoa.descricao,
   });
@@ -118,8 +122,8 @@ app.post("/cadastro/:id", validaIdPessoa, validaLogin, (req, res) => {
   return res.status(201).json("Novo recado adicionado");
 });
 
-//listar recados
-app.get("/pessoas/:id", validaIdPessoa, validaLogin, (req, res) => {
+// Listar recados
+app.get("/pessoas/:id", validaIdPessoa, (req, res) => {
   const id = Number(req.params.id);
   const indexPessoa = pessoas.findIndex((pessoa) => pessoa.id === id);
 
@@ -139,54 +143,34 @@ app.get("/pessoas/:id", validaIdPessoa, validaLogin, (req, res) => {
   return res.send(recadoDaPessoa);
 });
 
-//Atualiza recado
-app.put(
-  "/pessoas/:id/recados/:idRecado",
-  validaIdPessoa,
-  validaLogin,
-  (req, res) => {
-    const id = Number(req.params.id);
-    const idRecado = Number(req.params.idRecado);
-    const indexPessoa = pessoas.findIndex((p) => p.id === id);
-
-    const indexRecado = pessoas[indexPessoa].recado.findIndex(
-      (r) => r.idRecado === idRecado
-    );
-
-    //Valida se existe recado cadastrado
-    if (indexRecado === -1) {
-      return res.status(404).json("Recado não encontrado");
-    }
-
-    const recado = req.body;
-
-    pessoas[indexPessoa].recado[indexRecado] = {
-      idRecado: (recado.idRecado = idRecado),
-      titulo: recado.titulo,
-      descricao: recado.descricao,
-    };
-
-    return res.status(204).json("Recado atualizado");
-  }
-);
-
-//Deletar recados
-app.delete("/pessoas/:id/recados/:idRecado", validaIdPessoa, validaLogin, (req, res) => {
-  const id = Number(req.params.idPessoa);
+// Atualiza recado
+app.put("/pessoas/:id/recados/:idRecado", validaIdPessoa, validaIdRecado, (req, res) => {
+  const id = Number(req.params.id);
   const idRecado = Number(req.params.idRecado);
   const indexPessoa = pessoas.findIndex((p) => p.id === id);
 
-  const indexRecado = pessoas[indexPessoa].recado.findIndex(
-    (r) => r.idRecado === idRecado
-  );
+  const indexRecado = pessoas[indexPessoa].recado.findIndex((r) => r.idRecado === idRecado);
 
-  //Valida se existe recado cadastrado
-  if (indexRecado === -1) {
-    return res.status(404).json("Recado não encontrado");
-  }
+  const recado = req.body;
+
+  pessoas[indexPessoa].recado[indexRecado] = {
+    idRecado: (recado.idRecado = idRecado),
+    titulo: recado.titulo,
+    descricao: recado.descricao,
+  };
+
+  return res.status(204).json("Recado atualizado");
+});
+
+// Deletar recados
+app.delete("/pessoas/:id/recados/:idRecado", validaIdPessoa, validaIdRecado, (req, res) => {
+  const id = Number(req.params.id);
+  const idRecado = Number(req.params.idRecado);
+  const indexPessoa = pessoas.findIndex((p) => p.id === id);
+
+  const indexRecado = pessoas[indexPessoa].recado.findIndex((r) => r.idRecado === idRecado);
 
   pessoas[indexPessoa].recado.splice(indexRecado, 1);
-  return res.status(205).send("Recado deletado");
 });
 
 app.listen(8081, () => {
