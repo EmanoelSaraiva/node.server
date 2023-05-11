@@ -26,15 +26,16 @@ const validaIdRecado = (req, res, next) => {
 
   const indexPessoa = pessoas.findIndex((p) => p.id === idPessoa);
 
-  const indexRecado = pessoas[indexPessoa].recado.findIndex((r) => r.idRecado === idRecado);
+  const indexRecado = pessoas[indexPessoa].recado.findIndex(
+    (r) => r.idRecado === idRecado
+  );
 
   if (indexRecado === -1) {
     return res.status(400).json("Recado não encontrado");
   }
 
-  res.status(207).json("Recado alterado")
-  next()
-  
+  res.status(207).json("Recado alterado");
+  next();
 };
 
 //Inicio do CRUD
@@ -52,7 +53,7 @@ app.post("/cadastro", (req, res) => {
 
   const vSenha = /^(?=.*[a-zA-Z])[0-9a-zA-Z]{1,8}$/;
   if (!vSenha.test(req.body.senha)) {
-    return res.status(406).json("Senha inválida");
+    return res.status(406).json("Senha deve conter pelo menos uma letra");
   }
 
   bcrypt.hash(pessoa.senha, saltRounds, function (err, hash) {
@@ -144,34 +145,46 @@ app.get("/pessoas/:id", validaIdPessoa, (req, res) => {
 });
 
 // Atualiza recado
-app.put("/pessoas/:id/recados/:idRecado", validaIdPessoa, validaIdRecado, (req, res) => {
-  const id = Number(req.params.id);
-  const idRecado = Number(req.params.idRecado);
-  const indexPessoa = pessoas.findIndex((p) => p.id === id);
+app.put(
+  "/pessoas/:id/recados/:idRecado",
+  validaIdPessoa,
+  validaIdRecado,
+  (req, res) => {
+    const id = Number(req.params.id);
+    const idRecado = Number(req.params.idRecado);
+    const indexPessoa = pessoas.findIndex((p) => p.id === id);
 
-  const indexRecado = pessoas[indexPessoa].recado.findIndex((r) => r.idRecado === idRecado);
+    const indexRecado = pessoas[indexPessoa].recado.findIndex(
+      (r) => r.idRecado === idRecado
+    );
 
-  const recado = req.body;
+    const recado = req.body;
 
-  pessoas[indexPessoa].recado[indexRecado] = {
-    idRecado: (recado.idRecado = idRecado),
-    titulo: recado.titulo,
-    descricao: recado.descricao,
-  };
-
-  return res.status(204).json("Recado atualizado");
-});
+    pessoas[indexPessoa].recado[indexRecado] = {
+      idRecado: (recado.idRecado = idRecado),
+      titulo: recado.titulo,
+      descricao: recado.descricao,
+    };
+  }
+);
 
 // Deletar recados
-app.delete("/pessoas/:id/recados/:idRecado", validaIdPessoa, validaIdRecado, (req, res) => {
-  const id = Number(req.params.id);
-  const idRecado = Number(req.params.idRecado);
-  const indexPessoa = pessoas.findIndex((p) => p.id === id);
+app.delete(
+  "/pessoas/:id/recados/:idRecado",
+  validaIdPessoa,
+  validaIdRecado,
+  (req, res) => {
+    const id = Number(req.params.id);
+    const idRecado = Number(req.params.idRecado);
+    const indexPessoa = pessoas.findIndex((p) => p.id === id);
 
-  const indexRecado = pessoas[indexPessoa].recado.findIndex((r) => r.idRecado === idRecado);
+    const indexRecado = pessoas[indexPessoa].recado.findIndex(
+      (r) => r.idRecado === idRecado
+    );
 
-  pessoas[indexPessoa].recado.splice(indexRecado, 1);
-});
+    pessoas[indexPessoa].recado.splice(indexRecado, 1);
+  }
+);
 
 app.listen(8081, () => {
   console.log("Servidor Aberto");
