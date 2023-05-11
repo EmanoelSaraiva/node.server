@@ -7,7 +7,7 @@ Este é o repositório do projeto Trabalho Final Back-End CRUD, que implementa u
   - Node.js
   - VS Code
 
-<iframe src="https://giphy.com/embed/FkyeYygYJd1YDuXsSz" width="480" height="204" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/FkyeYygYJd1YDuXsSz">via GIPHY</a></p>
+<img src="https://giphy.com/embed/FkyeYygYJd1YDuXsSz" width="480" height="204" frameBorder="0" class="giphy-embed" allowFullScreen></img>
 
 ## A API fornece os seguintes endpoints:
 
