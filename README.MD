@@ -6,8 +6,7 @@ Este é o repositório do projeto Trabalho Final Back-End CRUD, que implementa u
   - JS
   - Node.js
   - VS Code
-
-<img src="https://giphy.com/embed/FkyeYygYJd1YDuXsSz" width="480" height="204" frameBorder="0" class="giphy-embed" allowFullScreen></img>
+![Insomnia](https://github.com/EmanoelSaraiva/node.server/assets/6977032/a04e778f-92e8-4d21-821c-0a9437e92728)
 
 ## A API fornece os seguintes endpoints:
 
