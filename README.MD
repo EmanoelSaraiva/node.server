@@ -32,9 +32,9 @@ Cria um novo usuário no sistema. Você deve fornecer o nome, email e senha no c
 Lista todos os usuários com suas notas <br>
 <h3>POST /login: </h3> 
 Realiza o login de um usuário. Você deve fornecer o email e a senha no corpo da requisição. <br>
-<h3>POST /cadastro/:id: </h3>
+<h3>POST /cadastro/:id : </h3>
 Cria um novo recado para o usuário com o ID específico. Você deve fornecer o título e a descrição do recado no corpo da requisição. <br>
-<h3>GET /pessoas/:id: </h3>
+<h3>GET /pessoas/:id : </h3>
 Lista todas as notas do usuário com o ID específico. <br>
 <h3>PUT /pessoas/:id/recados/:idRecado: </h3> 
 Atualiza uma nota com ID específico para um usuário com ID específico. Você deve fornecer o título e a descrição para atualizar o recado no corpo da requisição. <br>
